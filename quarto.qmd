@@ -61,13 +61,43 @@ Para decidir cual de las previas combinaciones de variables utilizar, llevamos a
 gr_mean_squared_error_by_model
 ```
 
-Notamos que tavg y tmin tienen errores cuadraticos medios, pero por una leve diferencia tavg y dia laboral presentan un mejor modelo.
+Notamos que tavg y tmin tienen errores cuadraticos medios, pero por una leve diferencia tavg y dia laboral presentan un mejor modelo.\
 
-#AGREGAR ECUACION DEL TAVG-DIALAB
+$$
+y = \alpha + \beta_1 . x_t + \beta_2 . x_t^2 + \beta_3 . x_l 
+$$
+
+alpha es el intercept
+
+xt es la variable que indica el valor de la temperatura promedio (tavg)
+
+xl es una variable dummy que si vale 1 si es dia laboral y 0 si es un dia no laboral
+
+esta ecuacion representa dos parabolas, ecuaciones cuadraticas, cuya diferencia es el desplazamiento en el eje y.
+
+```{r}
+gr_visualizacion_modelotavg
+```
 
 Aquí nos propusimos intentar de hallar una ecuacion que mejor describa el modelo aun.
 
 #AGREGAR ECUACION DEL TAVG-DIALABMEJORADO
+
+$$
+y = \alpha + \beta_1 . x_t + \beta_2 . x_t^2 + \beta_3 . x_l + \beta_4 . x_t . x_t^2 + \beta_5 . x_t . x_l + \beta_6 . x_t^2 . x_l + \beta_7 . x_t . x_t^2 . x_l 
+$$
+
+alpha es el intercept
+
+xt es la variable que indica el valor de la temperatura promedio (tavg)
+
+xl es una variable dummy que si vale 1 si es dia laboral y 0 si es un dia no laboral
+
+esta ecuacion representa dos ecuaciones de grado 3, cuya diferencia es el desplazamiento es y la amplitud de cada función.
+
+```{r}
+gr_visualizacion_modelotavg_mejorado
+```
 
 ```{r}
 gr_mean_squared_error_tavg_upgrade_model
@@ -113,7 +143,7 @@ Notamos que las variables mencionadas tienen cierta habilidad para predecir si u
 Para nuestro modelo de arboles de decision, debemos hallar el minsplit que mejor predice la variable type
 
 ```{r}
-v_accuracy_prom
+v_accuracy_prom_tree
 ```
 
 Vemos que para 15 testeos un minsplit con valor 22, fue el que mejor predijo en promedio.

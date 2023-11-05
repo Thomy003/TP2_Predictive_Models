@@ -31,6 +31,21 @@ clima_ecobici_lluvia_dialaboral <- clima_ecobici %>%
 
 
 #FUNCIONES ----
+observations_bike <- sample(x = nrow(clima_ecobici_lluvia_dialaboral), 
+                            size = nrow(clima_ecobici_lluvia_dialaboral) * 0.8,
+                            replace = F)
+
+df_train_bikes <- clima_ecobici_lluvia_dialaboral[observations_bike,]
+df_test_bikes <- clima_ecobici_lluvia_dialaboral[-observations_bike,]
+
+observations_news <- sample(x = nrow(fake_news), 
+                            size = nrow(fake_news) * 0.8,
+                            replace = F)
+
+df_train_news <- fake_news[observations_news,]
+df_test_news <- fake_news[-observations_news,]
+
+
 function_df_train_test_bike <- function(se){
   set.seed(se)
   observations_bike <- sample(x = nrow(clima_ecobici_lluvia_dialaboral), 
@@ -305,6 +320,11 @@ df_cuadratic$predicciones <- coef_linear_model_bikes_4[1] +
   coef_linear_model_bikes_4[3] *  (df_cuadratic$tavg)**2 +
   coef_linear_model_bikes_4[4] * as.numeric(df_cuadratic$dia_laboral == T)
 
+gr_visualizacion_modelotavg <- ggplot(data = df_cuadratic, mapping = aes(x = tavg, y = predicciones, col = dia_laboral)) +
+  geom_line(linewidth = 1.2) +
+  scale_color_manual(values = c("#ffa69e", "#6096ba"), labels = c("",""), guide = guide_legend(title = NULL)) +
+  theme_void()
+
 df_cuadratic$predicciones2 <- coef_linear_model_bikes_7[1] + 
   df_cuadratic$tavg * coef_linear_model_bikes_7[2] + 
   coef_linear_model_bikes_7[3] *  (df_cuadratic$tavg)**2 +
@@ -313,6 +333,11 @@ df_cuadratic$predicciones2 <- coef_linear_model_bikes_7[1] +
   coef_linear_model_bikes_7[6] * as.numeric(df_cuadratic$dia_laboral == T) * (df_cuadratic$tavg) +
   coef_linear_model_bikes_7[7] * as.numeric(df_cuadratic$dia_laboral == T) * (df_cuadratic$tavg)**2 +
   coef_linear_model_bikes_7[8] * as.numeric(df_cuadratic$dia_laboral == T) * (df_cuadratic$tavg)**2 * (df_cuadratic$tavg)
+
+gr_visualizacion_modelotavg_mejorado <- ggplot(data = df_cuadratic, mapping = aes(x = tavg, y = predicciones2, col = dia_laboral)) +
+  geom_line(linewidth = 1.2) +
+  scale_color_manual(values = c("#ffa69e", "#6096ba"), labels = c("",""), guide = guide_legend(title = NULL)) +
+  theme_void()
 
 gr_quadratic_ecuation_model <- df_cuadratic %>% 
   ggplot(mapping = aes(x = tavg, y = predicciones2, col = dia_laboral)) + 
