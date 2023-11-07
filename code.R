@@ -417,7 +417,7 @@ for(seed_val in 150:209){
   df_test_news <- fake_news[-observations_news,]
   
   
-  for(mins_val in 1:30){
+  for(mins_val in 1:50){
     
     tree_model <- rpart(data = df_train_news, formula = type ~ title_words + negative + title_has_excl, minsplit = mins_val)
     df_test_news$predictions <- predict(tree_model, df_test_news, type = "class")
@@ -432,10 +432,12 @@ for(seed_val in 150:209){
 
 v_accuracy_prom_tree <- df_accuracy_tree_models %>% group_by(mins_val) %>% summarise(accuracy_prom = mean(accuracy)) %>% arrange(desc(accuracy_prom))
 
+df_accuracy_tree_models %>% group_by(mins_val) %>% ggplot(mapping = aes(group = mins_val, x = mins_val, y = accuracy)) + geom_boxplot()
+
 #modelo de arbol de decision 
 tree_model <- rpart(data = fake_news, formula = type ~ title_words + negative + title_has_excl, minsplit = 28, )
 
-rpart.plot(tree_model, shadow.col = "#C8B596", box.palette = "Browns", tweak = 1.2)
+rpart.plot(tree_model, shadow.col = "#C8B596", box.palette = "Browns", tweak = 1.2, extra = 8)
 
 #matriz de confusión
 df_test_news_2 <- df_test_news %>% mutate(predictions = case_when(predictions == "real" ~ "pred_real",
@@ -478,7 +480,7 @@ for(i in 12:123){
 
 v_accuracy_prom_knn <- df_accuracy_k_models %>% group_by(k_val) %>% summarise(accuracy_prom = mean(accuracy)) %>% arrange(desc(accuracy_prom))
 
-
+df_accuracy_tree_models %>% filter(k_val < 60) %>% group_by(k_val) %>% ggplot(mapping = aes(group = k_val, x = k_val, y = accuracy)) + geom_boxplot()
 
 #Probemos las probabilidades de que la nueva noticia sea falsa o verdadera
 prediction_tree_model <- predict(tree_model, data.frame("title_words" = 15, "negative" = 6, "title_has_excl" = FALSE), type = "prob")
