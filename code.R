@@ -360,38 +360,49 @@ gr_quadratic_ecuation_model <- df_cuadratic %>%
 #ANALISIS EXPLORATORIO CLASIFICACION ----
 
 #real vs fake según title words y title exclamations
-gr_title_exclamations <- ggplot(data = fake_news, mapping = aes(y = title_words, x = type, col = title_has_excl)) +
-  geom_boxplot()
+#gr_title_exclamations <- ggplot(data = fake_news, mapping = aes(y = title_words, x = type, col = title_has_excl)) +
+  #geom_boxplot() +
+  #labs("")
 
 
 #real vs fake según negative y title exclamations
-gr_negative_exclamations <- ggplot(data = fake_news, mapping = aes(y = negative, x = type, col = title_has_excl)) +
-  geom_boxplot()
-
-
-#real vs fake según negative y title words
-gr_negative_title <- ggplot(data = fake_news, mapping = aes(y = negative, x = title_words, col = type)) +
-  geom_point()
-
+#gr_negative_exclamations <- ggplot(data = fake_news, mapping = aes(y = negative, x = type, col = title_has_excl)) +
+  #geom_boxplot()
 
 #real vs fake todas las variables (no usar)
 
-x <- fake_news %>% mutate(excl_type = case_when(title_has_excl == T & type == "real" ~ "real_excl",
-                                                title_has_excl == F & type == "real" ~ "real_noexcl",
-                                                title_has_excl == T & type == "fake" ~ "fake_excl",
-                                                .default =  "fake_noexcl"))
+#x <- fake_news %>% mutate(excl_type = case_when(title_has_excl == T & type == "real" ~ "real_excl",
+                                                #title_has_excl == F & type == "real" ~ "real_noexcl",
+                                                #title_has_excl == T & type == "fake" ~ "fake_excl",
+                                                #.default =  "fake_noexcl"))
 
-ggplot(data = x, mapping = aes(x = title_words, y = negative , colour = excl_type)) +
-  geom_point()
+#ggplot(data = x, mapping = aes(x = title_words, y = negative , colour = excl_type)) +
+  #geom_point()
+
+
+
+
+#en lugar de utilizar el grafico para mostrar la relacion entre type y title_has_excl utilizar la siguiente tabla:
+table_fakenews_excl <- table(fake_news$title_has_excl, fake_news$type)
+
+#real vs fake según negative y title words
+fit <- rpart(data = fake_news, type ~ negative + title_words)
+
+gr_negative_title_words <- ggplot(data = fake_news, mapping = aes(y = negative, x = title_words, col = type)) +
+  geom_parttree(data = fit, alpha = 0.1, aes(fill = type)) +
+  geom_point(aes(col = type)) +
+  labs(title = "Relación entre la negatividad y cantidad de palabras",
+       )
+  
 
 
 
 #Veamos que valor para minsplit mejor determina el arbol
 df_accuracy_tree_models <- data.frame("mins_val" = c(), "accuracy" = c())
 
-for(i in 130:150){
+for(seed_val in 150:209){
   
-  set.seed(i)
+  set.seed(seed_val)
   observations_news <- sample(x = nrow(fake_news), 
                               size = nrow(fake_news) * 0.8,
                               replace = F)
@@ -400,26 +411,33 @@ for(i in 130:150){
   df_test_news <- fake_news[-observations_news,]
   
   
-  for(j in 1:70){
+  for(mins_val in 1:30){
     
-    tree_model <- rpart(data = df_train_news, formula = type ~ title_words + negative + title_has_excl, minsplit = j)
+    tree_model <- rpart(data = df_train_news, formula = type ~ title_words + negative + title_has_excl, minsplit = mins_val)
     df_test_news$predictions <- predict(tree_model, df_test_news, type = "class")
     accuracy_tree_model <- mean(df_test_news$type == df_test_news$predictions)
     
     df_accuracy_tree_models <- rbind(df_accuracy_tree_models, 
-                                     data.frame("mins_val" = j, "accuracy" = accuracy_tree_model))
+                                     data.frame("mins_val" = mins_val, "accuracy" = accuracy_tree_model))
   }
 }
 
-df_accuracy_tree_models %>% ggplot(mapping = aes(x = mins_val, y = accuracy)) + geom_point()
+#df_accuracy_tree_models %>% ggplot(mapping = aes(x = mins_val, y = accuracy)) + geom_point()
 
 v_accuracy_prom_tree <- df_accuracy_tree_models %>% group_by(mins_val) %>% summarise(accuracy_prom = mean(accuracy)) %>% arrange(desc(accuracy_prom))
 
 #modelo de arbol de decision 
-tree_model <- rpart(data = df_train_news, formula = type ~ title_words + negative + title_has_excl, minsplit = 22)
+tree_model <- rpart(data = fake_news, formula = type ~ title_words + negative + title_has_excl, minsplit = 28, )
 
 rpart.plot(tree_model)
 
+#matriz de confusión
+df_test_news_2 <- df_test_news %>% mutate(predictions = case_when(predictions == "real" ~ "pred_real",
+                                                .default = "pred_fake"))
+
+
+table(df_test_news$type,df_test_news$predictions)
+prop.table(table(df_test_news_2$type,df_test_news_2$predictions)) 
 
 
 #modelo knn
@@ -427,7 +445,7 @@ rpart.plot(tree_model)
 #Veamos que valor para K mejor determina el KNN
 df_accuracy_k_models <- data.frame("k_val" = c(), "accuracy" = c())
 
-for(i in 3242:3260){
+for(i in 12:123){
   
   set.seed(i)
   observations_news <- sample(x = nrow(fake_news), 
@@ -462,7 +480,7 @@ prediction_tree_model <- predict(tree_model, data.frame("title_words" = 15, "neg
 prediction_knn_model <- knn(train = df_train_news[,c("title_words", "negative", "title_has_excl")], 
     test = data.frame("title_words" = 15, "negative" = 6, "title_has_excl" = FALSE), 
     cl =  df_train_news$type, 
-    k = 25,
+    k = 31,
     prob = T)
 
 
