@@ -46,12 +46,13 @@ gr_bike_uses_by_workdays
 
 Con esta variable en consideración, analizamos como se comporta esta variable con las otras variables disponibles
 
-Hallamos 4 variables que podrían ser candidatos para ser la segunda variable. Estas variables son tmin, tmax, tavg y llovio
+Hallamos 4 variables que podrían ser candidatos para ser la segunda variable. Estas variables son tmin, tmax, tavg y llovio.
+
+Los gráficos relacionados a la temperatura, son similares así que utilizaremos uno para representar todos.
 
 ```{r}
 gr_bike_uses_tavg_workday
-gr_bike_uses_tmin_workday
-gr_bike_uses_tmax_workday
+
 gr_bike_uses_rain_workday 
 ```
 
@@ -69,9 +70,11 @@ $$
 
 alpha es el intercept
 
+Los betas son coeficientes calculados por el modelo, que apuntan a una mejor aproximación.
+
 xt es la variable que indica el valor de la temperatura promedio (tavg)
 
-xl es una variable dummy que si vale 1 si es dia laboral y 0 si es un dia no laboral
+xl es una variable dummy que si vale 1 indica que es dia laboral y 0 que no es un dia laboral
 
 esta ecuacion representa dos parabolas, ecuaciones cuadraticas, cuya diferencia es el desplazamiento en el eje y.
 
@@ -89,15 +92,19 @@ $$
 
 alpha es el intercept
 
+Los betas son coeficientes calculados por el modelo, que apuntan a una mejor aproximación.
+
 xt es la variable que indica el valor de la temperatura promedio (tavg)
 
-xl es una variable dummy que si vale 1 si es dia laboral y 0 si es un dia no laboral
+xl es una variable dummy que si vale 1 indica que es dia laboral y 0 que no es un dia laboral
 
-esta ecuacion representa dos ecuaciones de grado 3, cuya diferencia es el desplazamiento es y la amplitud de cada función.
+esta ecuacion representa dos ecuaciones de grado 3, cuya diferencia es el desplazamiento y la amplitud de cada función.
 
 ```{r}
 gr_visualizacion_modelotavg_mejorado
 ```
+
+Según el gráfico podemos notar que la diferencia recae en mayor medida en los dias no laborales, por ende, encontramos una predicción mucho mejor para este tipo de casos.
 
 ```{r}
 gr_mean_squared_error_tavg_upgrade_model
@@ -150,6 +157,12 @@ rpart.plot(tree_model)
 
 #PONER EL ACCURACY Y CREAR LA MATRIZ DE CONFUSION
 
+```{r}
+table_matriz_de_confusion_tree
+
+v_accuracy_prom_tree[1,]
+```
+
 ### Modelo de K-NN
 
 Para nuestro modelo de k-nn, debemos hallar el k que mejor predice la variable type
@@ -158,9 +171,17 @@ Para nuestro modelo de k-nn, debemos hallar el k que mejor predice la variable t
 v_accuracy_prom_knn
 ```
 
-Vemos que para 15 testeos un k con valor 25, fue el que mejor predijo en promedio.
+Vemos que para 15 testeos un k con valor 31, fue el que mejor predijo en promedio.
 
 #probar con mas tests y ver otras variables (investigar rpart.control())
+
+#agregar un geom_point para mostrar las predicciones
+
+#agregar matriz de confusion y accuracy
+
+```{r}
+
+```
 
 #### Testeo
 

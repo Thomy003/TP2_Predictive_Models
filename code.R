@@ -445,7 +445,7 @@ df_test_news_2 <- df_test_news %>% mutate(predictions = case_when(predictions ==
 
 
 table(df_test_news$type,df_test_news$predictions)
-prop.table(table(df_test_news_2$type,df_test_news_2$predictions)) 
+table_matriz_de_confusion_tree <- prop.table(table(df_test_news_2$type,df_test_news_2$predictions)) 
 
 
 #modelo knn
@@ -481,6 +481,33 @@ for(i in 12:123){
 v_accuracy_prom_knn <- df_accuracy_k_models %>% group_by(k_val) %>% summarise(accuracy_prom = mean(accuracy)) %>% arrange(desc(accuracy_prom))
 
 df_accuracy_tree_models %>% filter(k_val < 60) %>% group_by(k_val) %>% ggplot(mapping = aes(group = k_val, x = k_val, y = accuracy)) + geom_boxplot()
+
+#grafico para visualizar las predicciones
+
+
+ggplot(data = df_train_news, mapping = aes(y = negative, x = title_words, col = type)) +
+  geom_point() +
+  geom_parttree(data = fit, alpha = 0.1, aes(fill = type)) +
+  geom_point(data = df_test_news_2, aes(y = negative, x = title_words, col = predictions)) +
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+  labs(title = "Negatividad y cantidad de palabras",
+       x = "Cantidad de palabras en el título",
+       y = "Porcentaje de negatividad en el título", 
+       col = "Tipo de noticia:")
+
+gr_negative_title_words <- ggplot(data = fake_news, mapping = aes(y = negative, x = title_words, col = type)) +
+  +   geom_parttree(data = fit, alpha = 0.1, aes(fill = type)) +
+  +   geom_point(aes(col = type)) +
+  +   scale_colour_manual(values = c("#ffa69e", "#6096ba"), labels= c('Fake', 'Real')) +
+  +   scale_fill_manual(values = c("#ffa69e", "#6096ba"), labels= c('Fake', 'Real')) +
+  +   scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+  +   labs(title = "Negatividad y cantidad de palabras",
+           +        x = "Cantidad de palabras en el título",
+           +        y = "Porcentaje de negatividad en el título", 
+           +        col = "Tipo de noticia:",
+           +        fill = "Tipo de noticia:")
+
+
 
 #Probemos las probabilidades de que la nueva noticia sea falsa o verdadera
 prediction_tree_model <- predict(tree_model, data.frame("title_words" = 15, "negative" = 6, "title_has_excl" = FALSE), type = "prob")
