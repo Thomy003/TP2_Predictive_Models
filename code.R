@@ -391,8 +391,14 @@ fit <- rpart(data = fake_news, type ~ negative + title_words)
 gr_negative_title_words <- ggplot(data = fake_news, mapping = aes(y = negative, x = title_words, col = type)) +
   geom_parttree(data = fit, alpha = 0.1, aes(fill = type)) +
   geom_point(aes(col = type)) +
-  labs(title = "Relación entre la negatividad y cantidad de palabras",
-       )
+  scale_colour_manual(values = c("#ffa69e", "#6096ba"), labels= c('Fake', 'Real')) +
+  scale_fill_manual(values = c("#ffa69e", "#6096ba"), labels= c('Fake', 'Real')) +
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+  labs(title = "Negatividad y cantidad de palabras",
+       x = "Cantidad de palabras en el título",
+       y = "Porcentaje de negatividad en el título", 
+       col = "Tipo de noticia:",
+       fill = "Tipo de noticia:")
   
 
 
@@ -429,7 +435,7 @@ v_accuracy_prom_tree <- df_accuracy_tree_models %>% group_by(mins_val) %>% summa
 #modelo de arbol de decision 
 tree_model <- rpart(data = fake_news, formula = type ~ title_words + negative + title_has_excl, minsplit = 28, )
 
-rpart.plot(tree_model)
+rpart.plot(tree_model, shadow.col = "#C8B596", box.palette = "Browns", tweak = 1.2)
 
 #matriz de confusión
 df_test_news_2 <- df_test_news %>% mutate(predictions = case_when(predictions == "real" ~ "pred_real",
