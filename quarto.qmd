@@ -1,24 +1,38 @@
 ---
 title: "tp2"
 author: "Miguel, Salvador, Thomas"
-format: html
-editor: visual
+format: 
+  html:
+    self-contained: true
+editor: source
 ---
 
 ## DATAFRAMES
 
-```{r}
+```{r message=FALSE, warning=FALSE, include = FALSE}
 source(file = "code.R", local = T)
 load("tp2.Rdata")
 ```
 
-#poner una visualizacion de ambos dataframes como en el tp1, y ademas explicar las nuevas variables creadas.
+<!--- Poner una visualización de ambos dataframes como en el tp1, y además explicar las nuevas variables creadas. --->
+
+### Dataframe de Clima-EcoBici
+
+```{r echo = FALSE}
+kable(head(clima_ecobici_lluvia_dialaboral))
+```
+
+### Dataframe Fake News
+
+```{r echo = FALSE}
+kable(head(fake_news[, -which(names(fake_news) == "text")]), format = "html")
+```
 
 ## LIBRERIAS
 
 Para el tp usamos las siguientes librerias
 
-```{r}
+```{r eval = FALSE}
 library(ggplot2)
 library(tidyverse)
 library(rpart)
@@ -26,31 +40,34 @@ library(rpart.plot)
 library(parttree)
 library(class)
 library(readr)
+library(knitr)
 ```
+
+<!--- Ponemos eval=F, include=F para evitar su ejecución puesto que estas librerías ya son ejecutadas en el archivo code.R --->
 
 ## REGRESIÓN
 
 #### Problema
 
-Buscamos hallar 2 varaibles que mejor describan/predigan el uso de bicis, según variables relacionadas al clima y fechas laborales.
+Buscamos hallar 2 variables que mejor describan/predigan el uso de bicis. En base a los resultados obtenidos en el desarrollo del TP1, consideramos como mejores posibles variables auxiliares aquellas que estén relacionadas con el clima y con los días laborales.
 
 #### Solución
 
 Comenzaremos observando y haciendo un analisis exploratorio del dataframe. Este analísis tiene como objetivo encontrar las variables que mejor describan el uso de bicicletas en CABA.
 
-Analizando cada variables independiente, observamos que una variable fue la que mejor se destaco en este analísis, la cual es "dia_laboral" que indica el uso de bicis en dias feriados/fines de semana y dias laborales.
+Analizando cada variable independiente, observamos que una opción fue la que mejor se destaco en este analísis, la cual es "dia_laboral" que indica el uso de bicis en dias feriados/fines de semana y dias laborales.
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 gr_bike_uses_by_workdays
 ```
 
-Con esta variable en consideración, analizamos como se comporta esta variable con las otras variables disponibles
+Con esta variable en consideración, analizamos como se comporta esta variable con las otras variables disponibles.
 
-Hallamos 4 variables que podrían ser candidatos para ser la segunda variable. Estas variables son tmin, tmax, tavg y llovio.
+Hallamos 4 variables que podrían ser candidatos para ser la segunda variable. Éstas son tmin, tmax, tavg y días lluviosos.
 
 Los gráficos relacionados a la temperatura, son similares así que utilizaremos uno para representar todos.
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 gr_bike_uses_tavg_workday
 
 gr_bike_uses_rain_workday 
@@ -62,21 +79,21 @@ Para decidir cual de las previas combinaciones de variables utilizar, llevamos a
 gr_mean_squared_error_by_model
 ```
 
-Notamos que tavg y tmin tienen errores cuadraticos medios, pero por una leve diferencia tavg y dia laboral presentan un mejor modelo.\
+Mediante este gráfico se puede apreciar que las variables tavg(TempProm) y tmin(TempMin) presentan mejores valores de errores cuadráticos medios en comparación a tmax(TempMax) y los dias laborales lluviosos. Dada la leve diferencia entre tavg y tmin, tavg y día laboral presentan un mejor modelo.
 
 $$
 y = \alpha + \beta_1 . x_t + \beta_2 . x_t^2 + \beta_3 . x_l 
 $$
 
-alpha es el intercept
+-   $\alpha$ es el intercept
 
-Los betas son coeficientes calculados por el modelo, que apuntan a una mejor aproximación.
+-   Los $\beta$ son coeficientes calculados por el modelo, que apuntan a una mejor aproximación.
 
-xt es la variable que indica el valor de la temperatura promedio (tavg)
+-   $x_t$ es la variable que indica el valor de la temperatura promedio (tavg)
 
-xl es una variable dummy que si vale 1 indica que es dia laboral y 0 que no es un dia laboral
+-   $x_l$ es una variable dummy que vale 1 si es dia laboral y 0 si es un día no laboral
 
-esta ecuacion representa dos parabolas, ecuaciones cuadraticas, cuya diferencia es el desplazamiento en el eje y.
+Esta ecuación representa dos parabolas, ecuaciones cuadraticas, cuya diferencia es el desplazamiento en el eje y.
 
 ```{r}
 gr_visualizacion_modelotavg
@@ -90,15 +107,15 @@ $$
 y = \alpha + \beta_1 . x_t + \beta_2 . x_t^2 + \beta_3 . x_l + \beta_4 . x_t . x_t^2 + \beta_5 . x_t . x_l + \beta_6 . x_t^2 . x_l + \beta_7 . x_t . x_t^2 . x_l 
 $$
 
-alpha es el intercept
+-   $\alpha$ es el intercept
 
-Los betas son coeficientes calculados por el modelo, que apuntan a una mejor aproximación.
+-   Los $\betas$ son coeficientes calculados por el modelo, que apuntan a una mejor aproximación.
 
-xt es la variable que indica el valor de la temperatura promedio (tavg)
+-   $x_t$ es la variable que indica el valor de la temperatura promedio (tavg)
 
-xl es una variable dummy que si vale 1 indica que es dia laboral y 0 que no es un dia laboral
+-   $x_l$ es una variable dummy que si vale 1 indica que es dia laboral y 0 que no es un dia laboral
 
-esta ecuacion representa dos ecuaciones de grado 3, cuya diferencia es el desplazamiento y la amplitud de cada función.
+Esta ecuación representa dos ecuaciones de grado 3, cuya diferencia es el desplazamiento y la amplitud de cada función.
 
 ```{r}
 gr_visualizacion_modelotavg_mejorado
@@ -112,10 +129,12 @@ gr_mean_squared_error_tavg_upgrade_model
 
 Nuevamente notamos que el error es un poco menor, por ende, utilizaremos esta mejora del tavg para predecir nuevos datos.
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 gr_quadratic_ecuation_model
 gr_bike_uses_tavg_workday
 ```
+
+Mediante este último cuadro, podemos evidenciar la similitud relativa que presenta el modelo con el comportamiento real de los datos.
 
 #### Conclusión
 
@@ -137,11 +156,11 @@ table_fakenews_excl
 gr_negative_title_words
 ```
 
-Notamos que las variables mencionadas tienen cierta habilidad para predecir si una noticia es real o fake. A partir de este analisis, ahora nos profundisaremos en crear dos modelos que puedan predecir que probabilidad tiene una noticia de ser fake o real.
+Notamos que las variables mencionadas tienen cierta habilidad para predecir si una noticia es real o fake. A partir de este gráfico, observamos una notoria tendencia en la veracidad de las noticias: a medida que el porcentaje de palabras negativas en los títulos y la cantidad de palabras que lo componen también es menor, hay una mayor concentración de noticias reales. En el resto de los cuadrantes observados en el gráfico, existe una mayor predominancia de noticias falsas.
 
-### Modelo de Arboles de Decisión
+### Modelo de Árboles de Decisión
 
-Para nuestro modelo de arboles de decision, debemos hallar el minsplit que mejor predice la variable type
+Para nuestro modelo de árboles de decisión, debemos hallar el minsplit que mejor predice la variable type
 
 ```{r}
 v_accuracy_prom_tree
