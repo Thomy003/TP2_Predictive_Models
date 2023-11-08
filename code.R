@@ -14,6 +14,8 @@ library(rpart.plot)
 library(parttree)
 library(class)
 library(readr)
+library(knitr)
+library(kableExtra)
 
 #variable ----
 v_dias_feriados <- c("2022-01-01", "2022-02-28", "2022-03-01", "2022-03-24", "2022-04-02", "2022-04-14", "2022-04-15", "2022-04-16", "2022-04-17", "2022-04-22", "2022-04-23", "2022-04-24", "2022-05-01", "2022-05-02", "2022-05-18", "2022-05-25", "2022-06-17", "2022-06-20", "2022-07-09", "2022-07-30", "2022-08-15", "2022-09-26", "2022-09-27", "2022-10-05", "2022-10-07", "2022-10-10", "2022-11-20", "2022-11-21", "2022-12-08", "2022-12-09", "2022-12-25" )
@@ -136,7 +138,7 @@ ggplot(clima_ecobici_lluvia_dialaboral, mapping = aes(x = wspd, y = n, colour = 
 #uso de bicis segun dia laborable
 gr_bike_uses_by_workdays <- ggplot(clima_ecobici_lluvia_dialaboral, mapping = aes(x = dia_laboral, y = n)) +
   geom_boxplot(col = c("#606c38", "#dda15e")) +
-  scale_x_discrete(labels = c("Dia laboral", "Dia no laboral")) +
+  scale_x_discrete(labels = c("Dia no laboral", "Dia laboral")) +
   scale_y_continuous( breaks = c(2000,4000,6000,8000,10000,12000,14000),
     labels = c(2000,4000,6000,8000,10000,12000,14000)) +
   labs(title = "Viajes de bicis - Días laborales VS Días no laborales",
@@ -453,7 +455,7 @@ table_matriz_de_confusion_tree <- prop.table(table(df_test_news_2$type,df_test_n
 #Veamos que valor para K mejor determina el KNN
 df_accuracy_k_models <- data.frame("k_val" = c(), "accuracy" = c())
 
-for(i in 12:123){
+for(i in 150:209){
   
   set.seed(i)
   observations_news <- sample(x = nrow(fake_news), 
@@ -480,7 +482,25 @@ for(i in 12:123){
 
 v_accuracy_prom_knn <- df_accuracy_k_models %>% group_by(k_val) %>% summarise(accuracy_prom = mean(accuracy)) %>% arrange(desc(accuracy_prom))
 
-df_accuracy_tree_models %>% filter(k_val < 60) %>% group_by(k_val) %>% ggplot(mapping = aes(group = k_val, x = k_val, y = accuracy)) + geom_boxplot()
+df_accuracy_tree_models %>% filter(mins_val < 60) %>% group_by(mins_val) %>% ggplot(mapping = aes(group = mins_val, x = mins_val, y = accuracy)) + geom_boxplot()
+
+set.seed(34)
+observations_news <- sample(x = nrow(fake_news), 
+                            size = nrow(fake_news) * 0.8,
+                            replace = F)
+
+df_train_news <- fake_news[observations_news,]
+df_test_news <- fake_news[-observations_news,]
+
+knn_model <- knn(train = df_train_news[,c("title_words", "negative", "title_has_excl")], 
+                 test = df_test_news[,c("title_words", "negative", "title_has_excl")], 
+                 cl =  df_train_news$type, 
+                 k = 31)
+
+# matriz de confusión
+table(df_test_news$type,knn_model)
+table_matriz_de_confusion_knn <- prop.table(table(df_test_news$type,knn_model)) 
+
 
 #grafico para visualizar las predicciones
 
@@ -495,17 +515,7 @@ ggplot(data = df_train_news, mapping = aes(y = negative, x = title_words, col = 
        y = "Porcentaje de negatividad en el título", 
        col = "Tipo de noticia:")
 
-gr_negative_title_words <- ggplot(data = fake_news, mapping = aes(y = negative, x = title_words, col = type)) +
-  +   geom_parttree(data = fit, alpha = 0.1, aes(fill = type)) +
-  +   geom_point(aes(col = type)) +
-  +   scale_colour_manual(values = c("#ffa69e", "#6096ba"), labels= c('Fake', 'Real')) +
-  +   scale_fill_manual(values = c("#ffa69e", "#6096ba"), labels= c('Fake', 'Real')) +
-  +   scale_y_continuous(labels = scales::percent_format(scale = 1)) +
-  +   labs(title = "Negatividad y cantidad de palabras",
-           +        x = "Cantidad de palabras en el título",
-           +        y = "Porcentaje de negatividad en el título", 
-           +        col = "Tipo de noticia:",
-           +        fill = "Tipo de noticia:")
+
 
 
 
