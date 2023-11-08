@@ -52,23 +52,25 @@ library(kableExtra)
 
 #### Problema
 
-Buscamos hallar 2 variables que mejor describan/predigan el uso de bicis, según variables relacionadas al clima y fechas laborales.
+Buscamos hallar 2 variables que mejor describan/predigan el uso de bicis, a partir de las variables que se observan en el primer dataframe, relacionadas al clima y a las fechas laborales.
 
 #### Solución
 
 Comenzaremos observando y haciendo un analisis exploratorio del dataframe. Este analísis tiene como objetivo encontrar las variables que mejor describan el uso de bicicletas en CABA.
 
-Analizando cada variable independiente, observamos que una variable fue la que mejor se destaco en este analísis, la cual es "dia_laboral" que indica el uso de bicis en dias feriados/fines de semana y dias laborales.
+Analizando cada variable independientemente, observamos que la variable `dia_laboral` fue la que mejor se destacó en este analísis, lo cual indica que el uso de bicis en días feriados o fines de semana es mucho menor comparado a los días laborales.
 
 ```{r message=FALSE, warning=FALSE}
 gr_bike_uses_by_workdays
 ```
 
-Con esta variable en consideración, analizamos como se comporta esta variable con las otras variables disponibles.
+Entonces vamos a tomar `dia_laboral` como candidata a variable predictoria, ahora analizaremos como se comporta está variable con relación a las otras variables disponibles.
 
-Hallamos 4 variables que podrían ser candidatos para ser la segunda variable. Éstas variables son tmin, tmax, tavg y llovio.
+Tras otro analisís hallamos que hay 4 variables que podrían ser candidatas para ser la segunda variable predictoria. Éstas variables son `tmin` , `tmax` , `tavg` y `llovio`.
 
-Los gráficos relacionados a la temperatura, son similares así que utilizaremos uno para representar todos.
+::: callout-note
+Los gráficos relacionados a la temperatura, son similares así que utilizaremos uno para representar la idea general.
+:::
 
 ```{r message=FALSE, warning=FALSE}
 gr_bike_uses_tavg_workday
@@ -76,13 +78,15 @@ gr_bike_uses_tavg_workday
 gr_bike_uses_rain_workday 
 ```
 
-Para decidir cual de las previas combinaciones de variables utilizar, llevamos a cabo una regresión lineal para cada combinación y calculamos el error cuadrático medio para 500 dataframes de testeo.
+Para decidir cual de las previas combinaciones de variables utilizar como variables predictorias, llevamos a cabo una modelación de regresión lineal para cada combinación, y con ella calculamos el error cuadrático medio para 300 dataframes de testeo distintos.
 
 ```{r}
 gr_mean_squared_error_by_model
 ```
 
-Mediante este gráfico se puede apreciar que las variables tavg(TempProm) y tmin(TempMin) presentan mejores valores de errores cuadráticos medios en comparación a tmax(TempMax) y los dias lluviosos. Dada la leve diferencia entre tavg y tmin, el modelo tavg-dia laboral presenta un error menor.\
+Mediante este gráfico se puede apreciar que las variables `tavg` (TempProm) y `tmin` (TempMin) presentan mejores valores de errores cuadráticos medios en comparación a `tmax` (TempMax) y `llovio` (días lluviosos). Dada la leve diferencia entre `tavg` y `tmin` , el modelo `tavg-dia_laboral` presenta un error menor.\
+
+#### Ecuación del Modelo de Regresión Lineal
 
 $$
 y = \alpha + \beta_1 . x_t + \beta_2 . x_t^2 + \beta_3 . x_l 
@@ -90,11 +94,11 @@ $$
 
 > $\alpha$ : Representa el intercept (ordenada al origen)
 >
-> $\beta_1 , \beta_2 , \beta_3$ : Representan los coeficientes calculados por el modelo, que apuntan a una mejor aproximación.
+> $\beta_1 , \beta_2 , \beta_3$ : Representan los coeficientes calculados por el modelo, que mejor describen las curvas de aproximación.
 >
-> $x_t$ : Representa la variables que indica el valor de la temperatura promedio (tavg)
+> $x_t$ : Es la variable que toma el valor de la temperatura promedio `tavg`
 >
-> $x_l$ : Representa una variable dummy que toma dos valores, 1 indica que es día laboral y 0 indica que no es un día laboral.
+> $x_l$ : Representa una variable dummy que toma dos valores, 1 si es día laboral y 0 si no es un día laboral.
 
 Esta ecuación representa dos parabolas, ecuaciones cuadraticas, cuya diferencia es el desplazamiento en el eje y.
 
@@ -102,7 +106,9 @@ Esta ecuación representa dos parabolas, ecuaciones cuadraticas, cuya diferencia
 gr_visualizacion_modelotavg
 ```
 
-Aquí nos propusimos intentar de hallar una ecuacion que mejor describa el modelo aun.
+#### Ecuación del Modelo de Regresión Lineal Mejorado
+
+Jugando con el modelo de regresión, notamos que hay una ecuación que describe un poco mejor el uso de bicis. Esta nueva ecuación, a comparación de la anterior, involucra una relación entre cada variable.
 
 <!--- AGREGAR ECUACION DEL TAVG-DIALABMEJORADO --->
 
@@ -112,11 +118,11 @@ $$
 
 > $\alpha$ : Representa el intercept (ordenada al origen)
 >
-> $\beta_1 , \beta_2 , \beta_3$ : Representan los coeficientes calculados por el modelo, que apuntan a una mejor aproximación.
+> $\beta_1 , \beta_2 , \beta_3$ : Representan los coeficientes calculados por el modelo, que mejor describen las curvas de aproximación.
 >
-> $x_t$ : Representa la variables que indica el valor de la temperatura promedio (tavg)
+> $x_t$ : Es la variable que toma el valor de la temperatura promedio `tavg`
 >
-> $x_l$ : Representa una variable dummy que toma dos valores, 1 indica que es día laboral y 0 indica que no es un día laboral.
+> $x_l$ : Representa una variable dummy que toma dos valores, 1 si es día laboral y 0 si no es un día laboral.
 
 Esta ecuación representa dos ecuaciones de grado 3, cuya diferencia es el desplazamiento y la amplitud de cada función.
 
@@ -124,13 +130,15 @@ Esta ecuación representa dos ecuaciones de grado 3, cuya diferencia es el despl
 gr_visualizacion_modelotavg_mejorado
 ```
 
-Según el gráfico podemos notar que la diferencia recae en mayor medida en los dias no laborales, por ende, encontramos una predicción mucho mejor para este tipo de casos.
+Según el gráfico del modelo podemos notar que la diferencia entre este gráfico y el anterior recae en la curva que explica el uso de bicis para los dias no laborales.
+
+Para estar seguros de que esta nueva ecuación es mejor que la anterior, corrimos unos casos tests a los cuales les calculamos el error cuadrático medio.
 
 ```{r}
 gr_mean_squared_error_tavg_upgrade_model
 ```
 
-Nuevamente notamos que el error es un poco menor, por ende, utilizaremos esta mejora del tavg para predecir nuevos datos.
+Nuevamente notamos que el error es un poco menor con esta última ecuación, por ende, utilizaremos dichas ecuación para predecir nuevos datos. , y también podemos afirmar que encontramos una predicción mucho mejor para los datos que pertenecen a días no laborales como se ve en los siguientes gráficos.
 
 ```{r message=FALSE, warning=FALSE}
 gr_quadratic_ecuation_model
@@ -140,6 +148,8 @@ gr_bike_uses_tavg_workday
 Mediante este último cuadro, podemos evidenciar la similitud relativa que presenta el modelo con el comportamiento real de los datos.
 
 #### Conclusión
+
+Podemos concluir que mediante un analisís exploratorio las dos variables que mejor pueden predecir el uso de bicis son: `tavg` y `dia_laboral` , pues sus errores son los que menor magnitud tenían. Aún así, quizás utilizando más variables podriamos llegar a descubrir un modelo con mejor precisión.
 
 ------------------------------------------------------------------------
 
@@ -153,9 +163,11 @@ El objetivo de este ejercicio es desarrollar un clasificador de noticias en "rea
 
 Comenzamos visualizando las variables predictoras para ver si pueden sesr útiles para clasificar las noticias en "reales" vs. "fake-news".
 
-```{r}
-table_fakenews_excl
+```{r echo = FALSE}
+kable(table_fakenews_excl)
+```
 
+```{r}
 gr_negative_title_words
 ```
 

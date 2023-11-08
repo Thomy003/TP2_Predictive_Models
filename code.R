@@ -385,7 +385,12 @@ gr_quadratic_ecuation_model <- df_cuadratic %>%
 
 
 #en lugar de utilizar el grafico para mostrar la relacion entre type y title_has_excl utilizar la siguiente tabla:
-table_fakenews_excl <- table(fake_news$title_has_excl, fake_news$type)
+df_table_fakenews_excl <- fake_news %>% mutate(title_has_excl = case_when(title_has_excl == T ~ "Título tiene exclamación",
+                                                .default = "Título no tiene exclamación"),
+                     type = case_when(type == "real" ~ "Noticia Real",
+                                      .default = "Noticia Fake"))
+
+table_fakenews_excl <- table(df_table_fakenews_excl$title_has_excl, df_table_fakenews_excl$type)
 
 #real vs fake según negative y title words
 fit <- rpart(data = fake_news, type ~ negative + title_words)
@@ -432,7 +437,7 @@ for(seed_val in 150:209){
 
 #df_accuracy_tree_models %>% ggplot(mapping = aes(x = mins_val, y = accuracy)) + geom_point()
 
-v_accuracy_prom_tree <- df_accuracy_tree_models %>% group_by(mins_val) %>% summarise(accuracy_prom = mean(accuracy)) %>% arrange(desc(accuracy_prom))
+v_accuracy_prom_tree <- df_accuracy_tree_models %>% mutate(valor_de_mins = mins_val) %>% select(valor_de_mins, accuracy) %>% group_by(valor_de_mins) %>% summarise(Accuracy_promedio = mean(accuracy)) %>% arrange(desc(Accuracy_promedio))
 
 df_accuracy_tree_models %>% group_by(mins_val) %>% ggplot(mapping = aes(group = mins_val, x = mins_val, y = accuracy)) + geom_boxplot()
 
@@ -447,7 +452,14 @@ df_test_news_2 <- df_test_news %>% mutate(predictions = case_when(predictions ==
 
 
 table(df_test_news$type,df_test_news$predictions)
-table_matriz_de_confusion_tree <- prop.table(table(df_test_news_2$type,df_test_news_2$predictions)) 
+
+
+df_table_matriz_de_confusion_tree <- df_test_news_2 %>% mutate(type = case_when(type == "real" ~ "Noticia Real",
+                                                                                .default = "Noticia Fake"),
+                                                               predictions = case_when(predictions == "pred_fake" ~ "Predicción Fake",
+                                                                                       .default = "Predicción Real"))
+
+table_matriz_de_confusion_tree <- prop.table(table(df_table_matriz_de_confusion_tree$type,df_table_matriz_de_confusion_tree$predictions)) 
 
 
 #modelo knn
@@ -480,26 +492,22 @@ for(i in 150:209){
   }
 }
 
-v_accuracy_prom_knn <- df_accuracy_k_models %>% group_by(k_val) %>% summarise(accuracy_prom = mean(accuracy)) %>% arrange(desc(accuracy_prom))
+v_accuracy_prom_knn <- df_accuracy_k_models %>% mutate(Valor_k = k_val) %>% select(Valor_k, accuracy) %>% group_by(Valor_k) %>% summarise(Accuracy_promedio = mean(accuracy)) %>% arrange(desc(Accuracy_promedio))
 
 df_accuracy_tree_models %>% filter(mins_val < 60) %>% group_by(mins_val) %>% ggplot(mapping = aes(group = mins_val, x = mins_val, y = accuracy)) + geom_boxplot()
 
-set.seed(34)
-observations_news <- sample(x = nrow(fake_news), 
-                            size = nrow(fake_news) * 0.8,
-                            replace = F)
 
-df_train_news <- fake_news[observations_news,]
-df_test_news <- fake_news[-observations_news,]
-
-knn_model <- knn(train = df_train_news[,c("title_words", "negative", "title_has_excl")], 
-                 test = df_test_news[,c("title_words", "negative", "title_has_excl")], 
-                 cl =  df_train_news$type, 
-                 k = 31)
 
 # matriz de confusión
 table(df_test_news$type,knn_model)
-table_matriz_de_confusion_knn <- prop.table(table(df_test_news$type,knn_model)) 
+
+df_table_matriz_de_confusion_knn <- df_test_news %>% mutate(type = case_when(type == "real" ~ "Noticia Real",
+                                                                                                .default = "Noticia Fake"),
+                                                                               predictions = knn_model) %>% 
+  mutate(predictions = case_when(predictions == "fake" ~ "Predicción Fake",
+                                 .default = "Predicción Real"))
+
+table_matriz_de_confusion_knn <- prop.table(table(df_table_matriz_de_confusion_knn$type,df_table_matriz_de_confusion_knn$predictions)) 
 
 
 #grafico para visualizar las predicciones
