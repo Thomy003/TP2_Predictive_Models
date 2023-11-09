@@ -413,7 +413,7 @@ gr_negative_title_words <- ggplot(data = fake_news, mapping = aes(y = negative, 
 #Veamos que valor para minsplit mejor determina el arbol
 df_accuracy_tree_models <- data.frame("mins_val" = c(), "accuracy" = c())
 
-for(seed_val in 150:209){
+for(seed_val in 158:211){
   
   set.seed(seed_val)
   observations_news <- sample(x = nrow(fake_news), 
@@ -459,15 +459,15 @@ df_table_matriz_de_confusion_tree <- df_test_news_2 %>% mutate(type = case_when(
                                                                predictions = case_when(predictions == "pred_fake" ~ "Predicción Fake",
                                                                                        .default = "Predicción Real"))
 
-table_matriz_de_confusion_tree <- prop.table(table(df_table_matriz_de_confusion_tree$type,df_table_matriz_de_confusion_tree$predictions)) 
-
+table_matriz_de_confusion_tree <- prop.table(table(df_table_matriz_de_confusion_tree$type,df_table_matriz_de_confusion_tree$predictions)) * 100 
+table_matriz_de_confusion_tree <- as.table(apply(table_matriz_de_confusion_tree, c(1, 2), function(x) paste0(round(x, 2), "%")))
 
 #modelo knn
 
 #Veamos que valor para K mejor determina el KNN
 df_accuracy_k_models <- data.frame("k_val" = c(), "accuracy" = c())
 
-for(i in 150:209){
+for(i in 109:209){
   
   set.seed(i)
   observations_news <- sample(x = nrow(fake_news), 
@@ -497,6 +497,10 @@ v_accuracy_prom_knn <- df_accuracy_k_models %>% mutate(Valor_k = k_val) %>% sele
 df_accuracy_tree_models %>% filter(mins_val < 60) %>% group_by(mins_val) %>% ggplot(mapping = aes(group = mins_val, x = mins_val, y = accuracy)) + geom_boxplot()
 
 
+knn_model <- knn(train = df_train_news[,c("title_words", "negative", "title_has_excl")], 
+                 test = df_test_news[,c("title_words", "negative", "title_has_excl")], 
+                 cl =  df_train_news$type, 
+                 k = 31)
 
 # matriz de confusión
 table(df_test_news$type,knn_model)
@@ -507,8 +511,8 @@ df_table_matriz_de_confusion_knn <- df_test_news %>% mutate(type = case_when(typ
   mutate(predictions = case_when(predictions == "fake" ~ "Predicción Fake",
                                  .default = "Predicción Real"))
 
-table_matriz_de_confusion_knn <- prop.table(table(df_table_matriz_de_confusion_knn$type,df_table_matriz_de_confusion_knn$predictions)) 
-
+table_matriz_de_confusion_knn <- prop.table(table(df_table_matriz_de_confusion_knn$type,df_table_matriz_de_confusion_knn$predictions)) * 100
+table_matriz_de_confusion_knn <- as.table(apply(table_matriz_de_confusion_knn, c(1, 2), function(x) paste0(round(x, 2), "%")))
 
 #grafico para visualizar las predicciones
 
@@ -535,6 +539,9 @@ prediction_knn_model <- knn(train = df_train_news[,c("title_words", "negative", 
     cl =  df_train_news$type, 
     k = 31,
     prob = T)
+
+probability <- attr(prediction_knn_model, "prob")
+cat("Probability Fake New:", round(probability * 100, digits = 1), "%\n")
 
 
 #para el dataframe de fake news saca todas las vaRIABLESA que no se utilizan osea todas menos las 3 del enunciado
