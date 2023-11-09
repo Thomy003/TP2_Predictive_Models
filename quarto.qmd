@@ -1,6 +1,6 @@
 ---
 title: "TP 2"
-author: "Miguel, Salvador y Thomas"
+author: "Miguel Avedaño, Salvador de Vedia y Thomas Castagnola"
 format: 
   html:
     self-contained: true
@@ -9,7 +9,7 @@ editor: source
 
 ## DATAFRAMES
 
-Para este projecto disponemos de 2 Dataframes que se nos han proporcionado:
+Para este projecto disponemos de 2 Dataframes que se nos han sido proporcionados:
 
 ```{r  message=FALSE, warning=FALSE, include = FALSE}
 source(file = "code.R", local = T)
@@ -52,21 +52,21 @@ library(kableExtra)
 
 #### Problema
 
-Buscamos hallar 2 variables que mejor describan/predigan el uso de bicis, a partir de las variables que se observan en el primer dataframe, relacionadas al clima y a las fechas laborales.
+Buscamos hallar 2 variables que mejor describan/predigan el uso de bicis, a partir de las variables que se observan en el primer dataframe.
 
 #### Solución
 
-Comenzaremos observando y haciendo un analisis exploratorio del dataframe. Este analísis tiene como objetivo encontrar las variables que mejor describan el uso de bicicletas en CABA.
+Comenzaremos observando y haciendo un análisis exploratorio del dataframe. Este análisis tiene como objetivo encontrar las variables que mejor describan el uso de bicicletas en CABA.
 
-Analizando cada variable independientemente, observamos que la variable `dia_laboral` fue la que mejor se destacó en este analísis, lo cual indica que el uso de bicis en días feriados o fines de semana es mucho menor comparado a los días laborales.
+Analizando cada variable independientemente, observamos que la variable `dia_laboral` fue la que mejor se destacó en este análisis, lo cual indica que el uso de bicis en días feriados o fines de semana es mucho menor comparado a los días laborales.
 
 ```{r message=FALSE, warning=FALSE}
 gr_bike_uses_by_workdays
 ```
 
-Entonces vamos a tomar `dia_laboral` como candidata a variable predictoria, ahora analizaremos como se comporta está variable con relación a las otras variables disponibles.
+Entonces vamos a tomar `dia_laboral` como candidata a variable predictora, ahora analizaremos como se comporta está variable con relación a las otras variables disponibles.
 
-Tras otro analisís hallamos que hay 4 variables que podrían ser candidatas para ser la segunda variable predictoria. Éstas variables son `tmin` , `tmax` , `tavg` y `llovio`.
+Tras otro análisis hallamos que hay 4 variables que podrían ser candidatas para ser la segunda variable predictora. Estas variables son `tmin` , `tmax` , `tavg` y `llovio`.
 
 ::: callout-note
 Los gráficos relacionados a la temperatura, son similares así que utilizaremos uno para representar la idea general.
@@ -78,7 +78,7 @@ gr_bike_uses_tavg_workday
 gr_bike_uses_rain_workday 
 ```
 
-Para decidir cual de las previas combinaciones de variables utilizar como variables predictorias, llevamos a cabo una modelación de regresión lineal para cada combinación, y con ella calculamos el error cuadrático medio para 300 dataframes de testeo distintos.
+Para decidir cuál de las previas combinaciones vamos utilizar como variables predictoras, llevamos a cabo una modelación de regresión lineal para cada combinación, y con ella calculamos el error cuadrático medio para 300 dataframes de testeo distintos.
 
 ```{r}
 gr_mean_squared_error_by_model
@@ -100,7 +100,7 @@ $$
 >
 > $x_l$ : Representa una variable dummy que toma dos valores, 1 si es día laboral y 0 si no es un día laboral.
 
-Esta ecuación representa dos parabolas, ecuaciones cuadraticas, cuya diferencia es el desplazamiento en el eje y.
+Esta ecuación representa dos parábolas, ecuaciones cuadráticas, cuya diferencia es el desplazamiento en el eje y.
 
 ```{r}
 gr_visualizacion_modelotavg
@@ -130,7 +130,7 @@ Esta ecuación representa dos ecuaciones de grado 3, cuya diferencia es el despl
 gr_visualizacion_modelotavg_mejorado
 ```
 
-Según el gráfico del modelo podemos notar que la diferencia entre este gráfico y el anterior recae en la curva que explica el uso de bicis para los dias no laborales.
+Según el gráfico del modelo podemos notar que la diferencia entre este gráfico y el anterior recae en la curva que explica el uso de bicis para los días no laborales.
 
 Para estar seguros de que esta nueva ecuación es mejor que la anterior, corrimos unos casos tests a los cuales les calculamos el error cuadrático medio.
 
@@ -138,7 +138,9 @@ Para estar seguros de que esta nueva ecuación es mejor que la anterior, corrimo
 gr_mean_squared_error_tavg_upgrade_model
 ```
 
-Nuevamente notamos que el error es un poco menor con esta última ecuación, por ende, utilizaremos dichas ecuación para predecir nuevos datos. , y también podemos afirmar que encontramos una predicción mucho mejor para los datos que pertenecen a días no laborales como se ve en los siguientes gráficos.
+Nuevamente, notamos que el error es un poco menor con esta última ecuación, por ende, utilizaremos dicha ecuación para predecir nuevos datos.
+
+Podemos afirmar que encontramos una predicción mejor para los datos que pertenecen a días no laborales, como se ve en los siguientes gráficos.
 
 ```{r message=FALSE, warning=FALSE}
 gr_quadratic_ecuation_model
@@ -149,7 +151,7 @@ Mediante este último cuadro, podemos evidenciar la similitud relativa que prese
 
 #### Conclusión
 
-Podemos concluir que luego de analizar la oscilación en el uso de Ecobicis dependiendo de distintas variables, concluimos que las dos variables que mejor pueden predecir el uso de bicis son: `tavg` y `dia_laboral` , siendo este último el que generaba el cambio más significativo.
+Podemos concluir que luego de analizar la oscilación en el uso de Ecobicis dependiendo de distintas variables, las dos variables que mejor pueden predecir el uso de bicis son: `tavg` y `dia_laboral` , siendo este último el que generaba el cambio más significativo.
 
 ------------------------------------------------------------------------
 
@@ -161,27 +163,29 @@ El objetivo de este ejercicio es desarrollar un clasificador de noticias en "rea
 
 #### Solución
 
-Comenzamos visualizando el comportamiento de las variables predictoras con respecto al tipo de noticas, para ver si pueden ser útiles para clasificar las noticias en "reales" o "fake-news", es decir si pueden influir en la veracidad de la noticia.
+Comenzamos visualizando el comportamiento de las variables predictoras con respecto al tipo de noticias, para ver si pueden ser útiles para clasificar las noticias en "reales" o "fake-news", es decir, si pueden influir en la veracidad de la noticia.
 
 ```{r echo = FALSE}
 kable(table_fakenews_excl)
 ```
 
+Observamos el uso de signos de exclamación influye de tal manera que una aparición de estos, muestra un gran aumento en la probabilidad de que la noticia sea fake.
+
 ```{r}
 gr_negative_title_words
 ```
 
-Notamos que las variables mencionadas tienen cierta habilidad para predecir si una noticia es real o fake. A partir de este analisis exploratorio, podemos observar una notoria tendencia en la veracidad de las noticias, a medida que el porcentaje de palabras negativas en los títulos y la cantidad de palabras que lo componen es menor, hay una mayor concentración mayoritaria de noticias reales. En el resto de los cuadrantes observados en el gráfico, existe una mayor predominancia de noticias falsas, exceptuando por una porción extra.
+En este otro gráfico, notamos que a medida que el porcentaje de palabras negativas en los títulos y la cantidad de palabras que lo componen es menor, hay una mayor concentración de noticias reales. En el resto de los cuadrantes, existe una mayor predominancia de noticias falsas, exceptuando por una porción extra.
 
-Además, el uso de signos de exclamación también influye de tal manera que una aparición de estos, muestra un aumento en la probabilidad de que la noticia sea fake.
+Finalmente podes afirmar que las variables mencionadas tienen cierta habilidad para predecir si una noticia es real o fake.
 
-Con esta información, ahora trabajaremos para crear dos modelos que puedan predecir que probabilidad tiene una noticia de ser fake o real, en base a estás variables.
+Con esta información, ahora trabajaremos para crear dos modelos que puedan predecir que probabilidad tiene una noticia de ser fake o real.
 
 ### Modelo de Árboles de Decisión
 
-Para nuestro modelo de árboles de decisión, debemos hallar el minsplit (mínima cantidad de observaciones para birfucar) que mejor predice la variable type.
+Para nuestro modelo de árboles de decisión, debemos hallar el minsplit (mínima cantidad de observaciones para birfurcar) que mejor predice la variable type.
 
-```{r}
+```{r echo = FALSE}
 head(v_accuracy_prom_tree, n = 10) %>% 
   kbl(digits = 3) %>% 
   kable_paper("hover", 
@@ -189,23 +193,23 @@ head(v_accuracy_prom_tree, n = 10) %>%
 
 ```
 
-Vemos que para varios testeos un minsplit de 28 o 29, son los que mejor predicen en promedio. Nosotros optamos por elegir 28.
+Vemos que para varios testeos, un minsplit de 28 o 29, son los que mejor predicen en promedio. Nosotros optamos por elegir 28.
 
 <!--- probar con mas tests y ver otras variables (investigar rpart.control()) --->
 
 Con un minsplit de 28, el árbol de decisión nos queda de la siguiente manera:
 
-```{r}
+```{r echo = FALSE}
 rpart.plot(tree_model, shadow.col = "#C8B596", box.palette = "Browns", tweak = 1.2, extra = 8)
 ```
 
-Un color marrón denota que la noticia tiene una mayor probabilidad de ser real, mientras que un color blanco indica que la noticia tiene mayor probabilidad de ser falsa. Los números bajo los tags (real o fake), señalan la probabilidad de que una noticia pertenezca a dicho tag
+Un color marrón denota que la noticia tiene una mayor probabilidad de ser real, mientras que un color blanco indica que la noticia tiene mayor probabilidad de ser falsa. Los números bajo los tags (real o fake), señalan la probabilidad de que una noticia pertenezca a dicho tag.
 
 <!--- PONER EL ACCURACY Y CREAR LA MATRIZ DE CONFUSION --->
 
 A continuación indicamos la matriz de confusión para un caso de testeo.
 
-```{r}
+```{r echo=FALSE}
 kable(table_matriz_de_confusion_tree)
 ```
 
@@ -213,22 +217,16 @@ kable(table_matriz_de_confusion_tree)
 
 A continuación, para nuestro modelo de k-nn, debemos hallar el k (cantidad de observaciones más cercanas con las que comparar) que mejor predice la variable type.
 
-```{r}
+```{r echo=FALSE}
 head(v_accuracy_prom_knn, n = 10) %>% 
   kbl(digits = 3) %>% 
   kable_paper("hover", 
               full_width = F)
 ```
 
-Vemos que para varios testeos un k con valor 31, es el que mejor predice en promedio. Vale aclarar, que previamente analizamos todos los casos individuales para evitar outliers y que el promedio se vea distorcionado.
+Vemos que para varios testeos un k con valor 31, es el que mejor predice en promedio. Vale aclarar, que previamente analizamos todos los casos individuales para evitar outliers y que el promedio se vea distorsionado.
 
-<!--- probar con mas tests y ver otras variables (investigar rpart.control()) --->
-
-<!--- agregar un geom_point para mostrar las predicciones--->
-
-<!--- agregar matriz de confusion y accuracy --->
-
-```{r}
+```{r echo = FALSE}
 kable(table_matriz_de_confusion_knn, digits = 3)
 ```
 
@@ -236,7 +234,7 @@ kable(table_matriz_de_confusion_knn, digits = 3)
 
 Para probar nuestros modelos vamos a suponer que se publica un nuevo artículo que tiene un título de 15 palabras sin signos de exclamación y el 6% de sus palabras tienen connotaciones negativas. Calcular la probabilidad de que el artículo sea "fake-news".
 
-Probemos con nuestos modelos cúal es la probabilidad de que esta noticia sea real o fake.
+Veamos cúal es la probabilidad de que esta noticia sea real o fake según los modelos
 
 ##### Modelo árbol de decisión:
 
@@ -256,8 +254,8 @@ cat("Probability Real New:", 100 - round(probability * 100, digits = 1), "%\n")
 
 #### Conclusión
 
-Si bien ambos modelos de predicción presentan una precisión alrededor de los 65/66%, es importante destacar que este nivel de exactitud, podría no ser completamente fiable para determinar con seguridad si una noticia es real o falsa. El hecho de que ambos modelos tengan un margen de error amplio sugiere que hay cierta incertidumbre en las predicciones.
+Si bien ambos modelos de predicción presentan una precisión alrededor del 66%, es importante destacar que este nivel de exactitud, podría no ser completamente fiable para determinar con seguridad si una noticia es real o falsa. El hecho de que ambos modelos tengan un margen de error amplio sugiere que hay cierta incertidumbre en las predicciones.
 
-De todas formas estos modelos pueden ser valiosos como una herramienta inicial para evaluar la autenticidad de una noticia. La precisión del 66% proporciona una indicación útil para realizar una primera evaluación.
+De todas formas, estos modelos pueden ser valiosos como una herramienta inicial para evaluar la autenticidad de una noticia. La precisión del 66% proporciona una indicación útil para realizar una primera evaluación.
 
 En resumen, estos modelos son una buena herramienta de detección inicial, pero no deben ser el único criterio para clasificar una noticia como real o falsa.
